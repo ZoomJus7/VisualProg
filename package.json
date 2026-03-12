@@ -1,0 +1,24 @@
+{
+  "name": "visualprog",
+  "version": "1.0.0",
+  "description": "Репозиторий для выполнения лабораторных работ по дисциплине **«Визуальное программирование»**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZoomJus7/VisualProg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZoomJus7/VisualProg/issues"
+  },
+  "homepage": "https://github.com/ZoomJus7/VisualProg#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
