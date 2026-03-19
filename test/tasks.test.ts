@@ -1,146 +1,92 @@
-import { describe, it, expect } from "vitest";
-import {
-  createUser,
-  createBook,
-  calculateArea,
-  getStatusColor,
-  capitalizeFirstLetter,
-  trim,
-  getFirstElement,
-  findById
-} from "../src/tasks.js";
+import { describe, it, expect, vi } from "vitest";
+import { csvToJSON, formatCSVFileToJSONFile } from "../src/tasks.js";
+import * as fs from "node:fs/promises";
 
-describe("Tests for ../src/tasks.ts", () => {
-    // createUser:  
-    it("createUser: Создание пользователя по умолчанию с isActive", () => {
-      const user = createUser(1, "Test 1");
-      expect(user.isActive).toBe(true);
+vi.mock("node:fs/promises", () => ({
+    readFile: vi.fn(),
+    writeFile: vi.fn(),
+}));
+
+describe("csvToJSON", () => {
+    it("Преобразование csv в json", () => {
+        const input = [
+            "p1;p2;p3;p4",
+            "1;A;b;c",
+            "2;B;v;d"
+        ];
+
+        const result = csvToJSON(input, ";");
+
+        expect(result).toEqual([
+            { p1: 1, p2: "A", p3: "b", p4: "c" },
+            { p1: 2, p2: "B", p3: "v", p4: "d" }
+        ]);
     });
 
-    it("createUser: Создание пользователя с isActive = false", () => {
-      const user = createUser(2, "Test 2", undefined, false);
-      expect(user.isActive).toBe(false);
+    it("Ошибка при несовпадении колонок", () => {
+
+        const input = [
+            "p1;p2",
+            "1;A;B"
+        ];
+
+        let errorCaught = false;
+
+        try {
+            csvToJSON(input, ";");
+        } catch (error) {
+            errorCaught = true;
+        }
+
+        expect(errorCaught).toBe(true);
     });
 
-    it("createUser: Создание пользователя с email", () => {
-      const user = createUser(3, "Test 3", "test@gmail.com");
-      expect(user.email).toBe("test@gmail.com");
+    it("Ошибка при пустом вводе", () => {
+
+        const input: string[] = [];
+
+        let errorCaught = false;
+
+        try {
+            csvToJSON(input, ";");
+        } catch (error) {
+            errorCaught = true;
+        }
+
+        expect(errorCaught).toBe(true);
     });
 
+});
 
-    // createBook:
-    it("createBook: Создание книги без year", () => {
-      const book = createBook({
-        title: "Lord of the Rings",
-        author: "J. R. R. Tolkin",
-        genre: "fiction"
-      });
-      expect(book.year).toBeUndefined();
+
+describe("formatCSVFileToJSONFile", () => {
+    it("Читает CSV и записывает JSON", async () => {
+        vi.spyOn(fs, "readFile").mockResolvedValue("p1;p2\n1;A\n2;B");
+
+        const writeSpy = vi.spyOn(fs, "writeFile").mockResolvedValue(undefined);
+
+        await formatCSVFileToJSONFile("input.csv", "output.json", ";");
+
+        expect(writeSpy).toHaveBeenCalled();
     });
 
-    it("createBook: Создание книги с year", () => {
-      const book = createBook({
-        title: "The Indifferent Stars Above",
-        author: "Daniel James Brown ",
-        year: 2009,
-        genre: "non-fiction"
-      });
-      expect(book.year).toBe(2009);
-    });
+    it("Передаются правильные данные в writeFile", async () => {
 
+        vi.spyOn(fs, "readFile").mockResolvedValue("p1;p2\n1;A\n2;B");
 
-    // calculateArea:
-    it("calculateArea: Вычисление площади квадрата", () => {
-      const result = calculateArea("square", 4);
-      expect(result).toBe(16);
-    });
+        const writeSpy = vi.spyOn(fs, "writeFile").mockResolvedValue(undefined);
 
-    it("calculateArea: Вычисление площади круга", () => {
-      const result = calculateArea("circle", 2);
-      expect(result).toBeCloseTo(Math.PI * 4);
-    });
+        await formatCSVFileToJSONFile("input.csv", "output.json", ";");
 
-
-    // getStatusColor:
-    it("getStatusColor: Возвращение green для active", () => {
-      const result = getStatusColor("active");
-      expect(result).toBe("green");
-    });
-
-    it("getStatusColor: Возвращение red для active", () => {
-      const result = getStatusColor("inactive");
-      expect(result).toBe("red");
-    });
-
-    it("getStatusColor: Возвращение new для new", () => {
-      const result = getStatusColor("new");
-      expect(result).toBe("blue");
-    });
-
-
-    // StringFormatter
-    it("capitalizeFirstLetter: Первая буква заглавная", () => {
-      const result = capitalizeFirstLetter("test");
-      expect(result).toBe("Test");
-    });
-
-    it("capitalizeFirstLetter: Вся строка заглавная", () => {
-      const result = capitalizeFirstLetter("test", true);
-      expect(result).toBe("TEST");
-    });
-
-    it("capitalizeFirstLetter: Возрат пустой строки", () => {
-      const result = capitalizeFirstLetter("");
-      expect(result).toBe("");
-    });
-
-
-    it("trim: Убирание пробелов по краям без заглавия строки", () => {
-      const result = trim("     trim     ");
-      expect(result).toBe("trim");
-    });
-
-    it("trim: Убирание пробелов и создание полностью заглавной строки", () => {
-      const result = trim("     trim     ", true);
-      expect(result).toBe("TRIM");
-    });
-
-    it("trim: Если пробелов нет - строка остаётся прежней", () => {
-      const result = trim("trim");
-      expect(result).toBe("trim");
-    });
-
-
-    // getFirstElement
-    it("getFirstElement: Возврат первого элемента массива", () => {
-      const result = getFirstElement([1984, 2077, 4587]);
-      expect(result).toBe(1984);
-    });
-
-    it("getFirstElement: Возврат underfined", () => {
-      const result = getFirstElement([]);
-      expect(result).toBeUndefined();
-    });
-
-
-    it("findById: Поиск объекта по id", () => {
-      const arr = [
-        {id: 1, name: "Yuumi"},
-        {id: 2, name: "Cat"}
-      ];
-
-      const result = findById(arr, 2);
-      expect(result?.name).toBe("Cat");
-    });
-
-    it("findById: Возврат underfined если id отсутствует", () => {
-      const arr = [
-        {id: 1},
-        {id: 2}
-      ];
-
-      const result = findById(arr, 3);
-
-      expect(result).toBeUndefined();
+        expect(writeSpy).toHaveBeenCalledWith(
+            "output.json",
+            JSON.stringify(
+                [
+                    { p1: 1, p2: "A" },
+                    { p1: 2, p2: "B" }
+                ]
+            ),
+            "utf-8"
+        );
     });
 });
