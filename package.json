@@ -1,0 +1,28 @@
+{
+  "name": "visualprog",
+  "version": "1.0.0",
+  "description": "(https://github.com/ZoomJus7/VisualProg/actions/workflows/main.yml/badge.svg?branch=lab4)",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZoomJus7/VisualProg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZoomJus7/VisualProg/issues"
+  },
+  "homepage": "https://github.com/ZoomJus7/VisualProg#readme",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
+  }
+}
